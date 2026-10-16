@@ -1,7 +1,7 @@
 // One sharing entry: QR and link copy live in the same dialog.
 document.addEventListener('DOMContentLoaded', () => {
     const issue = document.documentElement.dataset.issue;
-    const canonical = new URL('../../?issue=' + issue, location.href).href;
+    const canonical = new URL('../../?issue=' + encodeURIComponent(issue), location.href).href;
     const dialog = document.getElementById('share-dialog');
     const input = document.getElementById('share-url');
     input.value = canonical;

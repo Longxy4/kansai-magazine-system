@@ -4,21 +4,19 @@ import io
 import json
 import os
 from pathlib import Path
-import re
 import subprocess
 import tempfile
 from PIL import Image
 from pdf_interactions import extract_interactions
+from issue_catalog import discover_issues
 
 root = Path(__file__).resolve().parents[1]
 poppler = os.environ.get('PDFTOPPM', 'pdftoppm')
 issues = Path(os.environ.get('MAGAZINE_ISSUES_DIR', root / 'issues')).resolve()
-if not issues.is_dir():
-    raise ValueError('Set MAGAZINE_ISSUES_DIR to the publication repository issues folder')
-for pdf in sorted(issues.glob('*.pdf')):
-    issue = pdf.stem
-    if not re.fullmatch(r'\d{4}-(0[1-9]|1[0-2])', issue):
-        raise ValueError(f'Use YYYY-MM.pdf: {pdf.name}')
+catalog = discover_issues(issues)
+for entry in catalog:
+    pdf = issues / entry['filename']
+    issue = entry['id']
     build = root / '.build' / issue
     build.mkdir(parents=True, exist_ok=True)
     result = []
@@ -64,3 +62,4 @@ for pdf in sorted(issues.glob('*.pdf')):
     links = [link for page in interactions['pageLinks'] for link in page['links']]
     print(f"{issue}: {len(result)} reading pages, {len(interactions['tableOfContents'])} contents entries, "
           f"{len(links)} clickable areas ({sum(l['source'] == 'qr' for l in links)} QR codes)", flush=True)
+(root / '.build' / 'issues.json').write_text(json.dumps(catalog, ensure_ascii=False), encoding='utf-8')

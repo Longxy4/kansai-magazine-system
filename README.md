@@ -18,11 +18,23 @@
 ## 你以后每期只需要做三步
 
 1. 打开 [issues 文件夹](https://github.com/Longxy4/kansai-magazine/tree/main/issues)，点击 **Add file → Upload files**。
-2. 上传命名为 `YYYY-MM.pdf` 的 PDF，例如 `2027-01.pdf`，点击 **Commit changes** 保存到 `main`。
+2. 上传 PDF，保留原刊名即可，例如 `関西通信2025年9月号.pdf`、`2026年特別号.pdf` 或 `特别号.pdf`。原来的 `YYYY-MM.pdf` 也继续支持。点击 **Commit changes** 保存到 `main`。
 3. 打开 [Actions](https://github.com/Longxy4/kansai-magazine/actions)，等 **Publish magazine** 成功变绿。检查对应链接后分享：
    `https://longxy4.github.io/kansai-magazine/?issue=2027-01`
 
 不需要安装软件、不需要手动转换图片、不需要更改代码。GitHub 会自动生成所有期号的阅读文件并发布，旧期链接继续有效。
+
+### 文件名与固定链接
+
+| 上传文件名示例 | 固定链接中的 `issue` |
+| --- | --- |
+| `関西通信2025年9月号.pdf`、`2025-09.pdf` | `2025-09` |
+| `2026年特別号.pdf`、`2026年特别号.pdf`、`関西通信2026年特別号.pdf` | `2026-special` |
+| `特別号.pdf`、`特别号.pdf` | `special` |
+
+中文“特别号”和日文“特別号”均可，刊名前缀、空格、全角数字、大小写 PDF 扩展名也可识别。阅读器的分享按钮会生成统一的固定链接；查询参数也接受已发布各期的原文件名，例如 `?issue=関西通信2025年9月号`。已发布的 `2026-01`、`2026-07` 链接保持不变，不需要改名或重新分享。
+
+未来有多期特别号时，请在文件名中带上年份，以免都对应 `special`。同一期只能保留一个 PDF，例如 `2025-09.pdf` 与 `関西通信2025年9月号.pdf` 不可同时存在；流程会提示重复而停止发布。需要修订同一期时，请覆盖原文件。默认阅读入口按年份和月份选取最新一期；同年特别号没有月份时排在有月份的期号之前，无年份特别号排在有年份的期号之前。
 
 同一期修订：在 `issues` 上传同名 PDF 覆盖即可，再等待发布成功。不要删除需要继续访问的旧期 PDF。
 
@@ -54,4 +66,4 @@
 - `vendor/pages/` 保留生成器、阅读样式及模块源码。引擎由该版本源码编译，JS 和 CSS 一同保存。
 - 本项目适配：独立封面；横竖屏切换时更新引擎显示模式并保留当前页；初始页码；分享链接、二维码、原 PDF 入口；PDF 自动生成与部署；目录、原 PDF 超链接及二维码点击区域；接入 Pages 既有目录和链接菜单。
 
-本地开发先安装 `scripts/requirements.txt` 中的 Python 依赖，将 `MAGAZINE_ISSUES_DIR` 环境变量设为发布仓库 `issues` 文件夹的绝对路径，再运行 `python scripts/render-issues.py` 和 `node scripts/build-site.mjs`。需要 Poppler 的 `pdftoppm` 和 Node.js。输出位于本系统的 `_site/`；Windows 可用 `PDFTOPPM` 环境变量指定 `pdftoppm.exe` 的绝对路径。`python -m unittest discover -s tests` 检查实际 PDF 的目录、链接和二维码，`node --test tests/reader-inputs.test.mjs` 检查浮动栏及缩放输入。
+本地开发先安装 `scripts/requirements.txt` 中的 Python 依赖，将 `MAGAZINE_ISSUES_DIR` 环境变量设为发布仓库 `issues` 文件夹的绝对路径，再运行 `python scripts/render-issues.py` 和 `node scripts/build-site.mjs`。需要 Poppler 的 `pdftoppm`、Python 和 Node.js。渲染器统一识别文件名并生成 `.build/issues.json`，网站生成器使用同一份清单，不再分别判断命名。输出位于本系统的 `_site/`；Windows 可用 `PDFTOPPM` 环境变量指定 `pdftoppm.exe` 的绝对路径。`python -m unittest discover -s tests` 检查文件名、实际 PDF 的目录、链接和二维码，`node --test tests/*.test.mjs` 检查阅读链接、浮动栏及缩放输入。若 Python 不在 PATH 中，Node 测试可通过 `PYTHON` 环境变量指定解释器。

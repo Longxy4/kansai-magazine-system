@@ -9,14 +9,17 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
 from pdf_interactions import extract_interactions, add_qr_links, place_link, reading_index, safe_url
+from issue_catalog import discover_issues
 
 
 class MagazineLinks(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.pdf = Path(os.environ.get('MAGAZINE_ISSUES_DIR', ROOT / 'issues')) / '2026-07.pdf'
-        if not cls.pdf.is_file():
+        issue_dir = Path(os.environ.get('MAGAZINE_ISSUES_DIR', ROOT / 'issues'))
+        entry = next((entry for entry in discover_issues(issue_dir) if entry['id'] == '2026-07'), None)
+        if entry is None:
             raise unittest.SkipTest('The 2026-07 publication fixture is not available')
+        cls.pdf = issue_dir / entry['filename']
         cls.metadata = extract_interactions(cls.pdf, [])
 
     def test_printed_contents_has_all_15_articles_and_correct_right_page(self):

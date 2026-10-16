@@ -1,4 +1,4 @@
-import {readFile, writeFile, mkdir, readdir, copyFile} from 'node:fs/promises';
+import {readFile, writeFile, mkdir, copyFile} from 'node:fs/promises';
 import {generateFlipbookHtml} from '../vendor/pages/generator.js';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -10,7 +10,7 @@ await mkdir(path.join(out, 'vendor'), {recursive:true});
 await mkdir(path.join(out, 'issues'), {recursive:true});
 await copyFile(path.join(root, 'vendor/qrcode.js'), path.join(out, 'vendor/qrcode.js'));
 await writeFile(path.join(out, '.nojekyll'), '');
-const issues = (await readdir(issueRoot)).filter(n => /^\d{4}-(0[1-9]|1[0-2])\.pdf$/.test(n)).map(n=>n.slice(0,-4)).sort();
+const issues = JSON.parse(await read('.build/issues.json'));
 if (!issues.length) throw Error('No issues found');
 const names = ['utils','state','navigation','scaling','zoom','pageflip','ui','links','sidebar','main'];
 const js = (await Promise.all(names.map(n=>read('vendor/pages/flipbook/'+n+'.js')))).join('\n');
@@ -19,11 +19,12 @@ const engine = await read('vendor/pages/engine.js');
 const extraJs = await read('scripts/reader-extras.js');
 const license = await read('vendor/pages/ENGINE-LICENSE');
 const extraCss = await read('scripts/reader-dock.css');
-for (const issue of issues) {
+for (const entry of issues) {
+    const issue = entry.id;
     const pages = JSON.parse(await read('.build/'+issue+'/pages.json'));
     const interactions = JSON.parse(await read('.build/'+issue+'/interactions.json'));
     const book = await generateFlipbookHtml(pages, {
-        title:'関西通信 '+issue+' | freebird Kansai',mode:'folder',doubleSpread:false,extraCss,
+        title:entry.title+' | freebird Kansai',mode:'folder',doubleSpread:false,extraCss,
         tableOfContents:interactions.tableOfContents,linkPreviews:false
     }, {loadCss:async()=>css,loadJs:async()=>js,loadPageFlipJs:async()=>engine}, [], interactions.pageLinks);
     let html = book.html.replace('<html lang="en">','<html lang="ja" data-issue="'+issue+'">');
@@ -43,9 +44,11 @@ for (const issue of issues) {
     for (const asset of book.assets) {
         await writeFile(path.join(folder, asset.filename), Buffer.from(asset.data.slice(asset.data.indexOf(',')+1),'base64'));
     }
-    await copyFile(path.join(issueRoot, issue+'.pdf'),path.join(out, 'issues', issue+'.pdf'));
+    await copyFile(path.join(issueRoot, entry.filename),path.join(out, 'issues', issue+'.pdf'));
     console.log(issue+': generated Pages reader ('+pages.length+' pages)');
 }
 let router = await read('index.html');
-router = router.replace('__LATEST_ISSUE__',issues.at(-1));
+router = router.replace('__LATEST_ISSUE__',issues.at(-1).id);
+const aliases = Object.fromEntries(issues.flatMap(entry => entry.aliases.map(alias => [alias, entry.id])));
+router = router.replace('__ISSUE_ALIASES__',JSON.stringify(aliases).replaceAll('<','\\u003c'));
 await writeFile(path.join(out, 'index.html'),router);

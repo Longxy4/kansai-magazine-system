@@ -29,9 +29,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Check reader controls
+      - name: Check reader controls and issue links
         working-directory: system
-        run: node --test tests/reader-inputs.test.mjs
+        run: node --test tests/*.test.mjs
       - name: Install PDF rendering tools
         run: |
           sudo apt-get update -qq
