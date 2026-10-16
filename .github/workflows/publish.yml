@@ -1,0 +1,61 @@
+name: Build and deploy magazine publication
+on:
+  workflow_call:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      MAGAZINE_ISSUES_DIR: ${{ github.workspace }}/publication/issues
+    steps:
+      - name: Read publication PDFs
+        uses: actions/checkout@v4
+        with:
+          path: publication
+          persist-credentials: false
+      - name: Read magazine system
+        uses: actions/checkout@v4
+        with:
+          repository: Longxy4/kansai-magazine-system
+          ref: main
+          path: system
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Check reader controls
+        working-directory: system
+        run: node --test tests/reader-inputs.test.mjs
+      - name: Install PDF rendering tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y poppler-utils
+          python -m pip install -r system/scripts/requirements.txt
+      - name: Check PDF interactions
+        working-directory: system
+        run: python -m unittest discover -s tests -p 'test_*.py'
+      - name: Render PDFs and generate Pages readers
+        working-directory: system
+        run: |
+          python scripts/render-issues.py
+          node scripts/build-site.mjs
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: system/_site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

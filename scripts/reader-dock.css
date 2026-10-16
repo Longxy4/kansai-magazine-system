@@ -1,0 +1,50 @@
+#flipbook-wrapper{height:100vh;height:100dvh}
+#controls-panel,#controls-panel:hover{box-sizing:border-box;position:fixed;bottom:max(24px,env(safe-area-inset-bottom,0px) + 12px);left:50%;transform:translateX(-50%) translateY(10px);width:max-content;max-width:calc(100vw - 24px);min-width:0;height:auto;padding:8px 16px;border:1px solid #e5ded5;border-radius:30px;background:#fff;display:flex;justify-content:center;align-items:center;gap:12px;opacity:0;pointer-events:none;box-shadow:0 4px 20px #0001;transition:opacity .25s ease,transform .25s ease}
+#controls-panel.active,#controls-panel.active:hover{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+#controls-panel>*{flex-shrink:0}
+#controls-panel .page-input-container{gap:3px}
+#controls-panel .page-nav-btn{width:30px;height:36px;padding:0;font-size:26px;line-height:1}
+#page-input{box-sizing:border-box;width:38px;height:32px;padding:2px 4px;font-size:14px;background:white}
+#total-pages{white-space:nowrap;font-size:13px;color:#635a51}
+#controls-panel .zoom-controls{gap:5px}
+#zoom-slider{width:96px;margin:0}
+#zoom-slider::-webkit-slider-runnable-track{width:100%;margin:0}
+#zoom-level{min-width:30px;font-size:12px}
+#fullscreen-btn{width:32px;height:36px;padding:4px}
+#issue-share,#issue-pdf{box-sizing:border-box;font:inherit;font-size:13px;padding:8px;width:auto;flex-shrink:0;white-space:nowrap;border:0;border-radius:5px;background:transparent;color:#453a32;cursor:pointer;text-decoration:none}
+#issue-share:hover,#issue-pdf:hover{background:#eee8df}
+#share-dialog{box-sizing:border-box;width:min(340px,90vw);border:0;border-radius:14px;padding:22px;text-align:center;z-index:4000;color:#352c25}
+#share-dialog::backdrop{background:#0007}
+#qr-container svg{width:230px;max-width:100%;height:auto;display:block;margin:12px auto}
+#share-url{box-sizing:border-box;display:block;width:100%;min-width:0;margin:10px 0;padding:8px;font:inherit;font-size:12px}
+#copy-share,#close-share{padding:8px 12px;border:1px solid #ccc;background:#fff;border-radius:8px;font:inherit;font-size:13px;cursor:pointer}
+#close-share{margin-left:6px}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #c9785b;outline-offset:2px}
+#controls-panel #page-links-btn{width:auto;min-width:32px;height:36px;padding:4px;font:inherit;font-size:13px;white-space:nowrap}
+.toc-list button.toc-item{box-sizing:border-box;width:100%;border:0;background:transparent;font:inherit;text-align:left;color:inherit}
+.toc-list button.toc-item:hover,.toc-list button.toc-item.active{background:#c9785b19;color:#c9785b}
+#toc-list .toc-item-title{white-space:normal;flex:1;margin-right:12px}
+.toc-content{max-height:85dvh}
+body:has(.toc-modal:not(.hidden),.page-sidebar:not(.hidden)) #controls-panel{opacity:0;pointer-events:none}
+#toc-btn{box-sizing:border-box;position:fixed;left:0;top:50%;bottom:auto;transform:translateY(-50%);z-index:3100;display:block;width:12px;height:96px;min-width:0;margin:0;padding:0;color:transparent;border:0;border-radius:0;background:transparent;box-shadow:none;cursor:pointer;opacity:0}
+#toc-btn:hover,#toc-btn:focus-visible{opacity:0;background:transparent;box-shadow:none}
+#toc-btn[aria-expanded=true]{opacity:0;pointer-events:auto;z-index:3300}
+.page-sidebar{box-sizing:border-box;position:fixed;inset:0 auto 0 0;z-index:3200;width:min(216px,75vw);height:100vh;height:100dvh;display:flex;flex-direction:column;background:#faf8f4;border-right:1px solid #e5ded5;box-shadow:4px 0 20px #0002;transform:translateX(0);visibility:visible;transition:transform .2s ease,visibility .2s}
+.page-sidebar.hidden{display:flex;transform:translateX(-100%);visibility:hidden;pointer-events:none}
+.page-sidebar [hidden]{display:none!important}
+.sidebar-header{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:10px 8px 10px 12px;border-bottom:1px solid #e5ded5;background:#fff}
+.sidebar-tabs{display:flex;flex:1;gap:3px}
+.sidebar-tabs button{flex:1;padding:8px 6px;border:0;border-radius:5px;background:transparent;color:#635a51;font:inherit;font-size:13px;cursor:pointer}
+.sidebar-tabs button[aria-selected=true]{background:#eee8df;color:#352c25}
+#toc-close-btn{flex-shrink:0;width:27px;height:32px;padding:0;font-size:27px;color:#635a51;line-height:1}
+#thumbnail-list{display:block;box-sizing:border-box;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:12px;scrollbar-width:thin}
+.page-thumbnail{display:flex;flex-direction:column;align-items:center;gap:6px;margin:0 0 10px;padding:10px 7px 7px;border:1px solid transparent;border-radius:6px;color:#635a51;font-size:12px;line-height:1.3;text-decoration:none;cursor:pointer}
+.page-thumbnail img{display:block;width:128px;max-width:100%;height:auto;border:1px solid #ddd8cf;box-shadow:0 2px 5px #0001;background:#fff}
+.page-thumbnail:hover{background:#eee8df}
+.page-thumbnail.is-current{border-color:#c9785b;background:#c9785b13;color:#9e5036}
+.page-sidebar #toc-list{box-sizing:border-box;min-height:0;margin:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:8px 0}
+.page-sidebar #toc-list .toc-item{gap:6px;padding:12px;line-height:1.5;font-size:13px}
+.page-sidebar #toc-list .toc-item-title{margin-right:0}
+@media(prefers-reduced-motion:reduce){.page-sidebar{transition:none}}
+@media(max-width:600px){#controls-panel{flex-wrap:wrap;row-gap:2px}#controls-panel #page-links-btn{font-size:12px}}
+@media(max-width:600px){#controls-panel,#controls-panel:hover,#controls-panel.active{gap:5px;padding-left:8px;padding-right:8px;max-width:calc(100vw - 12px)}#controls-panel .page-input-container{gap:1px}#controls-panel .page-nav-btn{width:28px}#page-input{width:34px}#zoom-slider{width:56px}#controls-panel .zoom-controls{gap:2px}#zoom-level{min-width:26px}#fullscreen-btn{width:28px}#issue-share,#issue-pdf{padding:8px 5px;font-size:12px}}
