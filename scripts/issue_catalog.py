@@ -1,5 +1,6 @@
 """Resolve uploaded PDF names once for both rendering and site generation."""
 from pathlib import Path
+import hashlib
 import re
 import unicodedata
 
@@ -47,15 +48,27 @@ def discover_issues(directory):
     directory = Path(directory)
     if not directory.is_dir():
         raise ValueError('Set MAGAZINE_ISSUES_DIR to the publication repository issues folder')
-    catalog, seen = [], {}
+    catalog, seen, contents = [], {}, {}
     for pdf in sorted(directory.iterdir()):
         if not pdf.is_file() or pdf.suffix.lower() != '.pdf':
             continue
         entry = describe_issue(pdf.name)
-        if entry['id'] in seen:
-            raise ValueError(f'Duplicate issue {entry["id"]}: {seen[entry["id"]]} and {pdf.name}. '
-                             'Keep one PDF for each issue; include a year for different special issues.')
-        seen[entry['id']] = pdf.name
+        with pdf.open('rb') as stream:
+            digest = hashlib.file_digest(stream, 'sha256').hexdigest()
+        if entry['id'] in seen and seen[entry['id']]['sha256'] != digest:
+            raise ValueError(f'Duplicate issue {entry["id"]} has different PDF contents: '
+                             f'{seen[entry["id"]]["filename"]} and {pdf.name}. Keep the intended revision.')
+        if digest in contents:
+            previous = contents[digest]
+            previous['aliases'] = sorted(set(previous['aliases'] + entry['aliases']))
+            if previous['id'] != entry['id']:
+                previous['redirects'] = sorted(set(previous.get('redirects', []) + [entry['id']]))
+            if entry['id'].endswith('-special'):
+                previous['title'] = entry['title']
+            seen[entry['id']] = previous
+            continue
+        entry['sha256'] = digest
+        seen[entry['id']] = contents[digest] = entry
         catalog.append(entry)
     if not catalog:
         raise ValueError('No magazine PDFs found')

@@ -35,7 +35,7 @@ class IssueNames(unittest.TestCase):
                       ('特别号.pdf', '特別号.pdf')):
             with self.subTest(names=names), tempfile.TemporaryDirectory() as directory:
                 for name in names:
-                    (Path(directory) / name).touch()
+                    (Path(directory) / name).write_text(name, encoding='utf-8')
                 with self.assertRaisesRegex(ValueError, 'Duplicate issue'):
                     discover_issues(directory)
 
@@ -43,9 +43,23 @@ class IssueNames(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             for name in ('特別号.pdf', '2026年特別号.pdf', '関西通信2025年9月号.PDF',
                          '2026-07.pdf', 'README.md', '.gitkeep'):
-                (Path(directory) / name).touch()
+                (Path(directory) / name).write_text(name, encoding='utf-8')
             self.assertEqual([entry['id'] for entry in discover_issues(directory)],
                              ['special', '2025-09', '2026-special', '2026-07'])
+
+    def test_identical_uploads_merge_names_and_keep_existing_links(self):
+        with tempfile.TemporaryDirectory() as directory:
+            for name in ('2026-07.pdf', '関西通信2026年7月号.pdf'):
+                (Path(directory) / name).write_bytes(b'identical monthly PDF')
+            for name in ('2026-01.pdf', '2026年特別号.pdf'):
+                (Path(directory) / name).write_bytes(b'identical special PDF')
+            entries = discover_issues(directory)
+            self.assertEqual([entry['id'] for entry in entries], ['2026-01', '2026-07'])
+            self.assertEqual(entries[0]['redirects'], ['2026-special'])
+            self.assertIn('2026年特别号', entries[0]['aliases'])
+            self.assertIn('2026-special', entries[0]['aliases'])
+            self.assertIn('特別号', entries[0]['title'])
+            self.assertIn('関西通信2026年7月号', entries[1]['aliases'])
 
     def test_invalid_names_do_not_silently_disappear(self):
         for filename in ('関西通信2025年13月号.pdf', '2025-00.pdf', '../unknown.pdf', 'notes.pdf'):

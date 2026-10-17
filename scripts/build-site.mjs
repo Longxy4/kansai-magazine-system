@@ -41,6 +41,14 @@ for (const entry of issues) {
     const folder = path.join(out, 'read', issue);
     await mkdir(path.join(folder, 'images'), {recursive:true});
     await writeFile(path.join(folder, 'index.html'), html);
+    for (const alias of entry.redirects || []) {
+        const aliasFolder = path.join(out, 'read', alias);
+        await mkdir(aliasFolder, {recursive:true});
+        const destination = JSON.stringify('../' + issue + '/');
+        await writeFile(path.join(aliasFolder, 'index.html'),
+            '<!doctype html><meta charset="utf-8"><title>関西通信</title><script>location.replace('
+            + destination + '+location.hash);</script>');
+    }
     for (const asset of book.assets) {
         await writeFile(path.join(folder, asset.filename), Buffer.from(asset.data.slice(asset.data.indexOf(',')+1),'base64'));
     }

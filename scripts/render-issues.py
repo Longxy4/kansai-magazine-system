@@ -47,8 +47,11 @@ for entry in catalog:
         for n, image_path in enumerate(images):
             with Image.open(image_path) as image:
                 width, height = image.size
+                if interactions['layout'] == 'single':
+                    result.append(variants(image))
+                    continue
                 if width <= height:
-                    raise ValueError(f'{pdf.name}: expected landscape two-page spreads')
+                    raise ValueError(f'{pdf.name}: inconsistent rendered spread orientation')
                 left = image.crop((0, 0, width // 2, height))
                 right = image.crop((width // 2, 0, width, height))
                 if n == 0:
@@ -56,7 +59,8 @@ for entry in catalog:
                     result.append(variants(right))
                 else:
                     result.extend((variants(left), variants(right)))
-        result.append(back)
+        if back is not None:
+            result.append(back)
     (build / 'pages.json').write_text(json.dumps(result), encoding='utf-8')
     (build / 'interactions.json').write_text(json.dumps(interactions, ensure_ascii=False), encoding='utf-8')
     links = [link for page in interactions['pageLinks'] for link in page['links']]
