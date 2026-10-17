@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location('manage_publication', Path(__file__).parents[1] / 'scripts/manage-publication.py')
 manager = importlib.util.module_from_spec(spec)
@@ -11,6 +12,11 @@ spec.loader.exec_module(manager)
 
 
 class PublicationTransferTests(unittest.TestCase):
+    def setUp(self):
+        quiet = patch('builtins.print')
+        quiet.start()
+        self.addCleanup(quiet.stop)
+
     def test_only_successfully_published_replacements_are_saved(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

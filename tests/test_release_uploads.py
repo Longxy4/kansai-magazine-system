@@ -2,6 +2,7 @@ import importlib.util
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 import zipfile
 
 spec = importlib.util.spec_from_file_location('release_uploads', Path(__file__).parents[1] / 'scripts/download-release.py')
@@ -10,6 +11,11 @@ spec.loader.exec_module(uploads)
 
 
 class ReleaseUploads(unittest.TestCase):
+    def setUp(self):
+        quiet = patch('builtins.print')
+        quiet.start()
+        self.addCleanup(quiet.stop)
+
     def test_original_label_and_single_issue_title_restore_japanese_names(self):
         self.assertEqual(uploads.pdf_name({'name': '2026.7.pdf', 'label': '関西通信2026年7月号.pdf'}, 'Upload', 2), '関西通信2026年7月号.pdf')
         self.assertEqual(uploads.pdf_name({'name': '2026.7.pdf'}, '関西通信2026年7月号', 1), '関西通信2026年7月号.pdf')
