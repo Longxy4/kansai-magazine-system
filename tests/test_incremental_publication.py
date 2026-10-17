@@ -51,6 +51,10 @@ class IncrementalPublication(unittest.TestCase):
         self.issues, self.build, self.site = [self.home / p for p in ('issues', 'build', 'site')]
         self.issues.mkdir()
         self.calls = []
+        # Expected failure fixtures must not create real-file warnings in Actions.
+        quiet = patch.object(batch, 'print', create=True)
+        quiet.start()
+        self.addCleanup(quiet.stop)
 
     def upload(self, name, data=b'healthy PDF'):
         (self.issues / name).write_bytes(data)
