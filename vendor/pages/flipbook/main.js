@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
             minHeight: 100,
             maxHeight: 10000,
             autoSize: false,
-            showCover: true,
+            showCover: !isSingleMode,
             usePortrait: false,
             startPage: initialPage ? initialPage - 1 : 0,
             drawShadow: true,
@@ -103,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
             flippingShadowEndAlpha: 0,
             otherShadowOpacityScale: .5,
         });
+        flipbookEl.dataset.display = isSingleMode ? 'single' : 'double';
 
         updateEpubContentScale();
         pageFlip.loadFromHTML(document.querySelectorAll('.page-container'));
@@ -190,6 +191,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const settings = pageFlip.getSettings();
         const changed = settings.display !== (single ? 'single' : 'double');
         settings.display = single ? 'single' : 'double';
+        settings.showCover = !single;
+        flipbookEl.dataset.display = settings.display;
         settings.width = single ? dims.width : dims.width / 2;
         settings.height = dims.height;
         if (changed) pageFlip.updateFromHtml(window.FLIPBOOK_PAGES.map(p => p.cloneNode(true)));
