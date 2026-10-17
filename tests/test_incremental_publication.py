@@ -226,10 +226,12 @@ class IncrementalPublication(unittest.TestCase):
         self.assertIn(issue, (self.site / 'index.html').read_text())
         summary = subprocess.run([sys.executable, '-X', 'utf8', str(ROOT / 'scripts/publish-summary.py')],
                                  env=dict(os.environ, MAGAZINE_BUILD_DIR=str(self.build),
-                                          MAGAZINE_PUBLISHED_URL='https://example.com/magazine/'),
+                                          MAGAZINE_PUBLISHED_URL='https://example.com/magazine/',
+                                          GITHUB_STEP_SUMMARY=str(self.home / 'test-summary.md')),
                                  capture_output=True, text=True, encoding='utf-8', timeout=10)
         self.assertEqual(summary.returncode, 0, summary.stderr)
         self.assertIn(f'[{issue}](https://example.com/magazine/?issue={issue})', summary.stdout)
+        self.assertEqual((self.home / 'test-summary.md').read_text(encoding='utf-8').strip(), summary.stdout.strip())
         self.build = self.home / 'fresh-custom-build'
         self.calls.clear()
         with site_server(self.site) as base:
