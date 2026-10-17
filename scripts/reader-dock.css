@@ -9,6 +9,10 @@
 #controls-panel .zoom-controls{gap:5px}
 #zoom-slider{width:96px;margin:0}
 #zoom-slider::-webkit-slider-runnable-track{width:100%;margin:0}
+/* Match the thumb's travel box to its visible circle, so it reaches both ends. */
+#zoom-slider::-webkit-slider-thumb{width:16px;height:16px;border:0;margin-top:-6px}
+#zoom-slider::-moz-range-track{width:100%;margin:0}
+#zoom-slider::-moz-range-thumb{width:16px;height:16px;border:0}
 #zoom-level{min-width:30px;font-size:12px}
 #fullscreen-btn{width:32px;height:36px;padding:4px}
 #issue-share,#issue-pdf{box-sizing:border-box;font:inherit;font-size:13px;padding:8px;width:auto;flex-shrink:0;white-space:nowrap;border:0;border-radius:5px;background:transparent;color:#453a32;cursor:pointer;text-decoration:none}
