@@ -2,14 +2,14 @@
 
 适用对象：上传刊物、维护阅读链接和检查发布结果的人员。
 
-集中上传与发布的新流程、一次性授权及迁移状态见[集中上传与发布](centralized-publication.md)。完成切换前，本手册以下原有操作仍有效；切换后请以该说明的系统仓库入口为准。
+一次性授权、发布方式及迁移状态见[集中上传与发布](centralized-publication.md)。
 
 ## 1. 两个仓库各放什么
 
 | 位置 | 用途 | 日常操作 |
 | --- | --- | --- |
-| [发布仓库 kansai-magazine](https://github.com/Longxy4/kansai-magazine) | 每期 PDF、读者手册、期刊列表、发布入口 | 上传或修订 PDF、复制阅读链接 |
-| [系统仓库 kansai-magazine-system](https://github.com/Longxy4/kansai-magazine-system) | 阅读器、转换工具、共享发布流程及自动检查 | 更新系统或排查技术问题 |
+| [读者仓库 kansai-magazine](https://github.com/Longxy4/kansai-magazine) | 每期 PDF、读者手册、期刊列表及电子书 | 复制阅读链接、查看定稿 |
+| [系统仓库 kansai-magazine-system](https://github.com/Longxy4/kansai-magazine-system) | 上传入口、发布流程、阅读器、转换工具及自动检查 | 上传 PDF、发布、更新系统及排障 |
 
 发布网站固定为 `https://longxy4.github.io/kansai-magazine/`。没有杂志首页：根地址打开最新一期，每期有独立链接。普通读者无需账号；上传、修改和手动发布需要仓库相应权限。
 
@@ -18,7 +18,7 @@
 - 确认 PDF 是可公开的定稿，照片、姓名、联系方式和外部链接均已审定。
 - 检查页面顺序、目录、超链接和二维码。一本 PDF 统一使用单页排版或横向双页跨页排版。
 - 横向跨页 PDF 的首张必须是“左半封底、右半封面”；系统按此顺序拆页。竖向单页按原顺序处理。
-- GitHub 网页上传单文件限 25 MiB；较大文件使用本地 Git。常规 Git 单文件不超过 100 MiB。超过时先压缩 PDF，不要使用 Git LFS 代替当前发布方式。
+- 推荐在系统仓库 Release 附件上传 PDF。定稿最终通过 Git 入库，仍需小于 100 MiB；超过时先压缩。若直接使用读者仓库的网页文件上传，单文件限 25 MiB；较大文件使用本地 Git。不要使用 Git LFS 代替当前发布方式。
 - GitHub Pages 已发布网站限 1 GB，包含各期原 PDF 和页面图片，不能单独调高。新增较大刊物前，检查上次发布包大小并预留容量。
 
 ## 3. 文件名与固定链接
@@ -36,12 +36,14 @@
 
 ## 4. 上传与发布
 
-### 网页上传
+### 系统仓库上传（推荐）
 
-1. 打开发布仓库的 [issues 文件夹](https://github.com/Longxy4/kansai-magazine/tree/main/issues)。
-2. 选择 **Add file → Upload files**，上传定稿 PDF。
-3. 提交到 `main`。上传提交本身成功后，才会开始转换和部署。
-4. 打开 [Actions → Publish magazine](https://github.com/Longxy4/kansai-magazine/actions/workflows/publish.yml)，查看本次运行。
+1. 打开系统仓库 [Releases](https://github.com/Longxy4/kansai-magazine-system/releases)，选择 **Draft a new release**。
+2. 创建新标签，如 `upload-2027-01-01`，Target 选择 `main`。将一期或多期定稿 PDF 拖入附件区域，等待全部上传完成。
+3. 点击 **Publish release**，系统自动开始 **Upload and publish magazines**。
+4. 打开系统仓库 [Actions 发布入口](https://github.com/Longxy4/kansai-magazine-system/actions/workflows/manage-publication.yml)，查看本次结果。
+
+重复内容不再入库；坏文件不会覆盖旧的合格 PDF。发布后才补附件或修改 Release 不会自动重跑，需要手动运行工作流，release_tag 填该标签并勾选 publish。Release 附件目前公开，请只上传可公开定稿。
 
 ### 本地 Git 上传
 
@@ -69,9 +71,11 @@ git push origin main
 
 提交前检查 `git status`，确认只包含计划发布的文件及删除操作。如果提示没有修改，则没有新内容需要提交；不要反复上传未变化的文件。若推送因文件超过 100 MiB 失败，该批提交尚未上传成功，需要先压缩并重新整理本地提交。
 
+推送完成后，在**系统仓库**手动运行 **Upload and publish magazines**，勾选 publish、release_tag 留空。读者仓库提交不再自动转换。
+
 ## 5. 判断是否真正发布成功
 
-1. 等待本次 **Publish magazine** 成功。
+1. 等待系统仓库本次 **Upload and publish magazines** 成功（publish 已启用），以及读者仓库 GitHub 自动的 **pages build and deployment** 完成。只运行未勾选 publish 的构建检查不会上线。
 2. 打开该次运行的 **Summary → 杂志发布结果**，逐项检查：
 
 | 结果 | 含义 | 处理 |
@@ -87,15 +91,15 @@ git push origin main
 4. 检查封面、总页数、最后一页、目录跳转、关键外链、二维码；分别用电脑和手机打开。修订稿应检查实际修改的页面。
 5. 确认内容正确后，从阅读器 **共有** 复制固定链接或二维码对外分享。
 
-绿色状态表示可用内容已部署，不表示所有文件都成功。单份 PDF 出错会跳过该份，其余继续发布。若整批没有可读内容，或部署平台失败，原站点保留。
+系统流程绿色表示可用内容已写入发布分支，不表示每份文件都成功，也不代替 Pages 最终部署状态。单份 PDF 出错会跳过该份，其余继续发布。若整批没有可读内容，或部署平台失败，原站点保留。
 
 ## 6. 日常修订、改名与撤下
 
-**修订同一期：**覆盖原来使用的同名 PDF，提交并等待发布。固定链接不变。不要在同一期保留两份内容不同的版本；系统会优先保留正在使用的文件，跳过冲突文件。
+**修订同一期：**在新 Release 中上传同名修订 PDF，或用本地 Git 覆盖读者仓库同名文件后从系统仓库发布。固定链接不变。不要在同一期保留两份内容不同的版本；系统会优先保留正在使用的文件，跳过冲突文件。
 
 **修改文件名：**只改名且内容相同，系统可识别并保留原入口。若名称与内容都要修改，请先只改名发布一次，再修改内容；更稳妥的办法是继续覆盖原同名文件。避免同时改名和改内容被当成新刊。
 
-**撤下一期：**在 `issues` 删除该期的全部同内容副本，提交并等待部署，再检查原入口。删除文件会撤下现行站点中的刊物；若撤下后整站无刊物，流程会保留原站点而不发布空站，需要另行处理整站下线。
+**撤下一期：**在读者仓库 main 的 `issues` 删除该期的全部同内容副本，提交后从系统仓库手动发布，再检查原入口。仅删除系统 Release 不会撤下已保存的定稿。若撤下后整站无刊物，流程会保留原站点而不发布空站，需要另行处理整站下线。
 
 **公开范围：**两个仓库及已发布 PDF 均公开。读者可以保存、转发、查看源码和提交历史。删除当前文件不会删除 Git 历史；涉及不应公开的资料时，联系技术维护者处理历史记录及托管缓存，勿仅以“目录已消失”判断撤回完成。
 
@@ -105,7 +109,7 @@ git push origin main
 
 1. 在系统仓库更新代码并提交到 `main`。
 2. 等 **Check magazine system** 成功。
-3. 在发布仓库打开 **Publish magazine → Run workflow**，选择 `main` 并执行。
+3. 在系统仓库打开 **Upload and publish magazines → Run workflow**，选择 `main`，勾选 publish、release_tag 留空并执行。
 4. 按第 5 节检查实际阅读页面。系统仓库的检查不会自动替换读者网站。
 
 页面样式修改会复用现有图片；转换算法或依赖变化可能重新转换 PDF。部署仍会打包完整站点。首次转换、缓存失效恢复、较大 PDF 均可能增加耗时。

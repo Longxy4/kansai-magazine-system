@@ -13,9 +13,10 @@
 | `scripts/build-site.mjs` | 生成阅读器、图片、原 PDF 和发布清单 |
 | `scripts/reader-dock.css`、`reader-extras.js` | 控制栏和分享界面 |
 | `scripts/publish-summary.py` | 发布结果及实际阅读链接 |
+| `scripts/manage-publication.py` | 暂存 Release 上传、只保存验证通过的 PDF、更新读者链接 |
 | `vendor/pages/`、`vendor/qrcode.js` | 当前使用的上游阅读器与二维码代码 |
 | `tests/` | 系统回归检查；不进入读者站点 |
-| `.github/workflows/` | 系统检查与共享发布流程 |
+| `.github/workflows/` | 系统检查、集中上传与跨仓库发布 |
 
 ## 本地依赖与构建
 
@@ -39,7 +40,7 @@ python -m unittest discover -s tests -p 'test_*.py'
 node --test tests/*.test.mjs
 ```
 
-必要检查覆盖名称兼容、增量复用、单文件失败、旧版保留、链接、二维码及阅读器输入。测试输出与正式发布汇总隔离。修改后提交到系统仓库，等待 **Check magazine system** 成功，再从发布仓库手动运行 **Publish magazine**。
+必要检查覆盖名称兼容、增量复用、单文件失败、旧版保留、链接、二维码、阅读器输入及跨仓库 PDF 暂存。测试输出与正式发布汇总隔离。修改后提交到系统仓库，等待 **Check magazine system** 成功，再从系统仓库手动运行 **Upload and publish magazines** 并勾选 publish。
 
 发布产物只有阅读页、页面图片、原 PDF、二维码库、路由及 `publication.json`，不包含测试、源码目录或本地预览文件。公开仓库中的源码和历史记录本身仍可被访问。
 
@@ -50,10 +51,10 @@ node --test tests/*.test.mjs
 - 样式和阅读器代码变更复用页面图片；渲染算法和依赖变化会更新渲染版本。
 - 保留既有期号、名称别名和跳转目录。修订或重命名的行为以发布清单为准，不手动清空清单来处理单文件故障。
 - 2026 年特别号的固定入口为 `2026-01`，`2026-special` 是兼容入口；不可因整理文件而删除兼容跳转。
-- 回退代码后，也需要重新运行发布仓库工作流才能替换公开网站；同时核对 PDF 是否需要回退。
+- 回退代码后，也需要重新运行系统仓库的集中发布工作流才能替换公开网站；同时核对 PDF 是否需要回退。
 
 ## 来源与权限
 
-保留仍在使用的上游源码声明和许可证。发布流程使用发布仓库自己的 GitHub 临时令牌，源码检出不持久化登录凭据；不要在源文件、文档、PDF 或日志里加入访问密钥。
+保留仍在使用的上游源码声明和许可证。系统默认临时令牌只读取系统仓库；写入读者仓库使用专用 Secret `PUBLICATION_TOKEN`，只授予读者仓库 Contents 读写权限。源码检出不持久化登录凭据；不要在源文件、文档、PDF 或日志里加入访问密钥。网站通过 `gh-pages` 分支发布，静态部署复用开源 `peaceiris/actions-gh-pages`；定稿和链接通过正常 Git 提交写入 main，不强制覆盖分支历史。
 
 普通读者没有修改主分支和执行正式发布的权限。协作者的实际授权由仓库所有者管理，管理员应在 GitHub 中定期核对。请勿把“公开仓库”理解为“任何人均能修改”。

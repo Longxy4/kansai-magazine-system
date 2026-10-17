@@ -4,8 +4,8 @@
 
 | 仓库 | 用途 |
 | --- | --- |
-| [kansai-magazine](https://github.com/Longxy4/kansai-magazine) | 定稿 PDF、读者手册、阅读链接及发布入口 |
-| 本仓库 | 阅读器源码、转换工具、共享发布流程、维护文档与自动检查 |
+| [kansai-magazine](https://github.com/Longxy4/kansai-magazine) | 定稿 PDF、读者手册、阅读链接及已生成电子书 |
+| 本仓库 | 上传入口、发布流程、阅读器源码、转换工具、维护文档与自动检查 |
 
 ## 使用手册
 
@@ -18,9 +18,9 @@
 
 ## 发布方式
 
-正在准备将上传、发布入口完全集中到本仓库：新流程为 **Upload and publish magazines**，通过系统仓库 Release 附件接收 PDF，复用现有转换器，并使用开源 `peaceiris/actions-gh-pages` 更新读者仓库。见[集中上传与发布：授权、切换与日常操作](docs/centralized-publication.md)。跨仓库授权和首次上线验证完成前，下面的原发布方式继续有效。
+上传和发布均在本仓库进行。打开 [Releases](https://github.com/Longxy4/kansai-magazine-system/releases) → Draft a new release，新建标签、选择 main、附上定稿 PDF，等待附件上传完成后 Publish release。系统自动运行 **Upload and publish magazines**，复用现有转换器和开源 `peaceiris/actions-gh-pages`，把验证通过的 PDF 和链接写入读者仓库 main，把电子书写入 gh-pages，再由 GitHub Pages 上线。
 
-管理人员将 PDF 提交到发布仓库的 `issues` 文件夹后，发布仓库调用本系统的共享流程，转换新增或修改的文件，并部署到原有 Pages 网站。内容未变化时复用现有页面；重复内容合并，单份文件失败时跳过该份并优先保留旧版。
+内容未变化时复用现有页面；重复文件不再入库，单份文件失败时跳过该份并优先保留旧版。也可继续通过本地 Git 更新读者仓库 issues，之后从本仓库 Actions 手动发布。读者仓库不再保存自定义上传或转换工作流。操作和授权维护见[集中上传与发布](docs/centralized-publication.md)。
 
 阅读网站无需登录或安装应用。电脑双页、手机竖屏单页，支持目录、缩略图、1—3 倍缩放、分享二维码及原 PDF。每期独立链接，根地址打开最新一期。
 
