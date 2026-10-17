@@ -26,11 +26,13 @@
 ## 以后上传一期或一批
 
 1. 打开系统仓库 **Releases → Draft a new release**。
-2. 创建一个新的标签，例如 `upload-2026-11-01`；Target 选择 main。将定稿 PDF 拖入附件区域，等待所有上传完成，再点击 **Publish release**。
+2. 创建一个新的标签，例如 `upload-2026-11-01`；Target 选择 main。单份 PDF 的标题填原刊名；批量原名为中文、日文或其他非标准名称时，将 PDF 放入一个 ZIP。将 PDF 或 ZIP 拖入附件区域，等待所有上传完成，再点击 **Publish release**。
 3. 系统自动运行 **Upload and publish magazines**。摘要逐份显示成功、复用、重复跳过或失败。重复 PDF 不再写入读者仓库；坏文件不会覆盖旧的合格 PDF；其他可处理文件继续发布。
 4. 去读者仓库 README 复制本期固定阅读链接，并打开网站验证。
 
 每个 PDF 仍需小于 100 MiB，因为定稿最终要通过 Git 保存到读者仓库。Release 附件的上传方式不会改变这个限制。系统仓库 Releases 的附件也会公开，请只上传可公开的定稿。
+
+GitHub 会改写部分非 ASCII 附件名。系统优先用附件标签恢复原名；单个 PDF 还可用 Release 标题恢复。批量直接上传多个 PDF 时请用 `2027-01.pdf`、`2027-special.pdf` 等 ASCII 名称；ZIP 内则完整保留原 PDF 名称，普通号、特别号和其他刊名的既有规则全部适用。同名不同内容的 ZIP 成员会跳过冲突文件，并继续处理其余文件。
 
 修复失败文件后，可新建另一个 Release 上传；如果后来才给旧 Release 补附件，需要到 Actions 手动运行，在 release_tag 填旧标签并勾选 publish。编辑旧 Release 或补附件本身不会再次触发 published 事件。
 

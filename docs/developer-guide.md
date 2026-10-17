@@ -14,6 +14,7 @@
 | `scripts/reader-dock.css`、`reader-extras.js` | 控制栏和分享界面 |
 | `scripts/publish-summary.py` | 发布结果及实际阅读链接 |
 | `scripts/manage-publication.py` | 暂存 Release 上传、只保存验证通过的 PDF、更新读者链接 |
+| `scripts/download-release.py` | 用 GitHub CLI 获取附件，恢复刊名或读取 ZIP 中的原文件名 |
 | `vendor/pages/`、`vendor/qrcode.js` | 当前使用的上游阅读器与二维码代码 |
 | `tests/` | 系统回归检查；不进入读者站点 |
 | `.github/workflows/` | 系统检查、集中上传与跨仓库发布 |

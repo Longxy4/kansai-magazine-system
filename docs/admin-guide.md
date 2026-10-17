@@ -39,11 +39,13 @@
 ### 系统仓库上传（推荐）
 
 1. 打开系统仓库 [Releases](https://github.com/Longxy4/kansai-magazine-system/releases)，选择 **Draft a new release**。
-2. 创建新标签，如 `upload-2027-01-01`，Target 选择 `main`。将一期或多期定稿 PDF 拖入附件区域，等待全部上传完成。
+2. 创建新标签，如 `upload-2027-01-01`，Target 选择 `main`。单份 PDF 的 Release 标题填写原刊名（如 `関西通信2027年1月号`）；多个日文或非标准文件名的 PDF 请先放入一个 ZIP，以完整保留原文件名。将 PDF 或 ZIP 拖入附件区域，等待全部上传完成。
 3. 点击 **Publish release**，系统自动开始 **Upload and publish magazines**。
 4. 打开系统仓库 [Actions 发布入口](https://github.com/Longxy4/kansai-magazine-system/actions/workflows/manage-publication.yml)，查看本次结果。
 
 重复内容不再入库；坏文件不会覆盖旧的合格 PDF。发布后才补附件或修改 Release 不会自动重跑，需要手动运行工作流，release_tag 填该标签并勾选 publish。Release 附件目前公开，请只上传可公开定稿。
+
+GitHub 可能改写日文附件名，系统会优先使用附件标签或单 PDF 的 Release 标题恢复原名。批量直接上传多个 PDF 时，请使用 `2027-01.pdf`、`2027-special.pdf` 等 ASCII 文件名；要保留任意原名请用 ZIP。ZIP 内的每个 PDF 仍须小于 100 MiB。
 
 ### 本地 Git 上传
 

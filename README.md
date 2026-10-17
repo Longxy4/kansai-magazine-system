@@ -18,7 +18,7 @@
 
 ## 发布方式
 
-上传和发布均在本仓库进行。打开 [Releases](https://github.com/Longxy4/kansai-magazine-system/releases) → Draft a new release，新建标签、选择 main、附上定稿 PDF，等待附件上传完成后 Publish release。系统自动运行 **Upload and publish magazines**，复用现有转换器和开源 `peaceiris/actions-gh-pages`，把验证通过的 PDF 和链接写入读者仓库 main，把电子书写入 gh-pages，再由 GitHub Pages 上线。
+上传和发布均在本仓库进行。打开 [Releases](https://github.com/Longxy4/kansai-magazine-system/releases) → Draft a new release，新建标签、选择 main、附上定稿 PDF（单份时标题填原刊名；保留批量日文或非标准文件名请用 ZIP），等待附件上传完成后 Publish release。系统自动运行 **Upload and publish magazines**，复用现有转换器和开源 `peaceiris/actions-gh-pages`，把验证通过的 PDF 和链接写入读者仓库 main，把电子书写入 gh-pages，再由 GitHub Pages 上线。
 
 内容未变化时复用现有页面；重复文件不再入库，单份文件失败时跳过该份并优先保留旧版。也可继续通过本地 Git 更新读者仓库 issues，之后从本仓库 Actions 手动发布。读者仓库不再保存自定义上传或转换工作流。操作和授权维护见[集中上传与发布](docs/centralized-publication.md)。
 

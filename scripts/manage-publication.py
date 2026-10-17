@@ -29,7 +29,7 @@ def prepare(publication, incoming, combined):
         shutil.copyfile(source, combined / source.name)
 
 
-def collect(publication, incoming, combined, site):
+def collect(publication, incoming, combined, site, report=None):
     manifest = json.loads((site / 'publication.json').read_text(encoding='utf-8'))
     entries = [record['entry'] for record in manifest['issues']]
     accepted = {entry['filename']: entry['sha256'] for entry in entries}
@@ -51,6 +51,10 @@ def collect(publication, incoming, combined, site):
     (publication / 'README.md').write_text('\n'.join(lines), encoding='utf-8')
     shutil.copyfile(publication / 'README.md', site / 'README.md')
     shutil.copytree(publication / 'docs', site / 'docs', dirs_exist_ok=True)
+    if report and (incoming / '.rejected.json').exists():
+        events = json.loads(report.read_text(encoding='utf-8'))
+        events.extend(json.loads((incoming / '.rejected.json').read_text(encoding='utf-8')))
+        report.write_text(json.dumps(events, ensure_ascii=False), encoding='utf-8')
 
 
 if __name__ == '__main__':
@@ -60,6 +64,7 @@ if __name__ == '__main__':
     parser.add_argument('--incoming', type=Path, required=True)
     parser.add_argument('--combined', type=Path, required=True)
     parser.add_argument('--site', type=Path)
+    parser.add_argument('--report', type=Path)
     args = parser.parse_args()
     args.incoming.mkdir(parents=True, exist_ok=True)
     if args.mode == 'prepare':
@@ -67,4 +72,4 @@ if __name__ == '__main__':
     else:
         if not args.site:
             parser.error('collect requires --site')
-        collect(args.publication, args.incoming, args.combined, args.site)
+        collect(args.publication, args.incoming, args.combined, args.site, args.report)
