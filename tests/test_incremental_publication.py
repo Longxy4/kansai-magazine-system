@@ -103,7 +103,7 @@ class IncrementalPublication(unittest.TestCase):
         self.upload('2025-09.pdf')
         self.upload('関西通信2025年9月号.pdf', b'conflicting revision')
         self.upload('2026-01.pdf', b'bad PDF')
-        self.upload('notes.pdf')
+        self.upload('2026-13.pdf')
         self.upload('2026-07.pdf', b'second healthy PDF')
         ready, events = self.prepare()
         self.assertEqual([e['id'] for e in ready], ['2025-09', '2026-07'])
@@ -200,6 +200,42 @@ class IncrementalPublication(unittest.TestCase):
         ready, events = batch.prepare(ROOT, self.issues, self.build, timeout=60)
         self.assertEqual([e['id'] for e in ready], ['2026-07'])
         self.assertTrue(any(e['status'] == 'skipped' for e in events))
+        self.build_site()
+
+    def test_nonstandard_title_survives_rename_update_and_remote_cache_recovery(self):
+        from issue_catalog import describe_issue
+        original = '2026年交流会特集.pdf'
+        renamed = '2026年交流会 特別編集版.pdf'
+        self.upload(original)
+        ready, _ = self.prepare()
+        issue = ready[0]['id']
+        self.build_site()
+        (self.issues / original).rename(self.issues / renamed)
+        self.calls.clear()
+        ready, events = self.prepare()
+        self.assertEqual(ready[0]['id'], issue)
+        self.assertEqual(self.calls, [])
+        self.assertIn(describe_issue(renamed)['id'], ready[0]['redirects'])
+        self.build_site()
+        self.upload(renamed, b'updated custom issue')
+        ready, _ = self.prepare()
+        self.assertEqual(ready[0]['id'], issue)
+        self.assertEqual(self.calls, [renamed])
+        manifest = self.build_site()
+        self.assertEqual(manifest['issues'][0]['entry']['title'], renamed[:-4])
+        self.assertIn(issue, (self.site / 'index.html').read_text())
+        summary = subprocess.run([sys.executable, '-X', 'utf8', str(ROOT / 'scripts/publish-summary.py')],
+                                 env=dict(os.environ, MAGAZINE_BUILD_DIR=str(self.build),
+                                          MAGAZINE_PUBLISHED_URL='https://example.com/magazine/'),
+                                 capture_output=True, text=True, encoding='utf-8', timeout=10)
+        self.assertEqual(summary.returncode, 0, summary.stderr)
+        self.assertIn(f'[{issue}](https://example.com/magazine/?issue={issue})', summary.stdout)
+        self.build = self.home / 'fresh-custom-build'
+        self.calls.clear()
+        with site_server(self.site) as base:
+            ready, _ = self.prepare(base)
+        self.assertEqual(ready[0]['id'], issue)
+        self.assertEqual(self.calls, [])
         self.build_site()
 
 

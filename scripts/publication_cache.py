@@ -9,6 +9,7 @@ import shutil
 import tempfile
 from urllib.parse import urljoin, urlsplit, unquote
 from urllib.request import Request, urlopen
+from issue_catalog import ISSUE_ID
 
 SCHEMA = 1
 
@@ -95,7 +96,7 @@ def previous_manifest(build, base):
         for record in data['issues']:
             entry = record['entry']
             object_key(entry['sha256'], record['rendererKey'])
-            if not re.fullmatch(r'(?:[0-9]{4}-(?:[0-9]{2}|special)|special)', entry['id']):
+            if not re.fullmatch(ISSUE_ID, entry['id']):
                 raise ValueError('Invalid published issue')
             if Path(entry['filename']).name != entry['filename']:
                 raise ValueError('Invalid PDF filename')

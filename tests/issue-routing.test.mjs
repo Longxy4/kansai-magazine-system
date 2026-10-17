@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 
 const catalog = JSON.parse(execFileSync(process.env.PYTHON || 'python', ['-X','utf8','-c',
     'import json; from issue_catalog import describe_issue; print(json.dumps([describe_issue(n) for n in '
-    + '["関西通信2025年9月号.pdf", "2026年特別号.pdf", "特别号.pdf", "2026-07.pdf"]]))'],
+    + '["関西通信2025年9月号.pdf", "2026年特別号.pdf", "特别号.pdf", "2026-07.pdf", "2026年交流会特集.pdf"]]))'],
     {cwd:fileURLToPath(new URL('../scripts',import.meta.url)), encoding:'utf8'}));
 const aliases = Object.fromEntries(catalog.flatMap(entry => entry.aliases.map(alias => [alias,entry.id])));
 const source = readFileSync(new URL('../index.html',import.meta.url),'utf8')
@@ -43,4 +43,10 @@ test('unpublished or unsafe issue names show a message without redirecting',()=>
         assert.equal(result.target,undefined);
         assert.match(result.status.textContent,/見つかりません/);
     }
+});
+
+test('nonstandard titles and assigned extra IDs use the same fixed reader',()=>{
+    const issue = catalog.find(e=>e.filename==='2026年交流会特集.pdf').id;
+    for (const name of ['2026年交流会特集', '２０２６年 交流会特集.PDF', issue])
+        assert.equal(route(name).target,'./read/'+issue+'/#page=8');
 });

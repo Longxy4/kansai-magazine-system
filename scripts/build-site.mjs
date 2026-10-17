@@ -26,7 +26,7 @@ const license = await read('vendor/pages/ENGINE-LICENSE');
 const extraCss = await read('scripts/reader-dock.css');
 function cacheFolder(entry) {
     if (!/^[a-f0-9]{64}-[a-f0-9]{64}$/.test(entry.cache)) throw Error('Invalid cache key');
-    if (!/^(?:[0-9]{4}-(?:[0-9]{2}|special)|special)$/.test(entry.id)) throw Error('Invalid issue ID');
+    if (!/^(?:[0-9]{4}-(?:[0-9]{2}|special)|special|extra-[a-f0-9]{12})$/.test(entry.id)) throw Error('Invalid issue ID');
     return path.join(build, 'objects', entry.cache);
 }
 async function load(entry) {
@@ -78,7 +78,7 @@ async function emit(entry, data, html) {
     await writeFile(path.join(out, pdfPath), data.pdf);
     await writeFile(path.join(out, readerPath), html);
     for (const alias of entry.redirects || []) {
-        if (!/^(?:[0-9]{4}-(?:[0-9]{2}|special)|special)$/.test(alias) || alias === entry.id) continue;
+        if (!/^(?:[0-9]{4}-(?:[0-9]{2}|special)|special|extra-[a-f0-9]{12})$/.test(alias) || alias === entry.id) continue;
         const aliasFolder = path.join(out, 'read', alias);
         await mkdir(aliasFolder, {recursive:true});
         await writeFile(path.join(aliasFolder, 'index.html'),

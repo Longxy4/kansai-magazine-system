@@ -64,10 +64,28 @@ class IssueNames(unittest.TestCase):
             self.assertIn('関西通信2026年7月号', entries[1]['aliases'])
 
     def test_invalid_names_do_not_silently_disappear(self):
-        for filename in ('関西通信2025年13月号.pdf', '2025-00.pdf', '../unknown.pdf', 'notes.pdf'):
+        for filename in ('関西通信2025年13月号.pdf', '2025-00.pdf', '../unknown.pdf', '.pdf', 'notes.txt'):
             with self.subTest(filename=filename), self.assertRaises(ValueError):
                 describe_issue(filename)
         self.assertEqual(normalize_name(' 関西通信２０２５年９月号.PDF '), '関西通信2025年9月号')
+
+    def test_nonstandard_titles_get_distinct_reproducible_extra_ids(self):
+        first = describe_issue('2026年交流会特集.pdf')
+        self.assertRegex(first['id'], r'^extra-[a-f0-9]{12}$')
+        self.assertEqual(first['title'], '2026年交流会特集')
+        self.assertEqual(first['sort'], [2026, 0])
+        self.assertEqual(first['id'], describe_issue('２０２６年 交流会特集.PDF')['id'])
+        self.assertNotEqual(first['id'], describe_issue('2026年交流会写真集.pdf')['id'])
+        self.assertEqual(describe_issue('臨時増刊号.pdf')['sort'], [0, 0])
+
+    def test_standard_name_wins_over_identical_nonstandard_copy_on_first_publish(self):
+        with tempfile.TemporaryDirectory() as directory:
+            for name in ('archive.pdf', '関西通信2025年9月号.pdf'):
+                (Path(directory) / name).write_bytes(b'same magazine')
+            entry, = discover_issues(directory)
+            self.assertEqual(entry['id'], '2025-09')
+            self.assertIn('archive', entry['aliases'])
+            self.assertIn(describe_issue('archive.pdf')['id'], entry['redirects'])
 
 
 if __name__ == '__main__':

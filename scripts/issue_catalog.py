@@ -7,6 +7,7 @@ import unicodedata
 
 PREFIXES = ('', '関西通信', '关西通讯', '關西通訊')
 PREFIX = r'(?:関西通信|关西通讯|關西通訊)?'
+ISSUE_ID = r'(?:[0-9]{4}-(?:[0-9]{2}|special)|special|extra-[a-f0-9]{12})'
 
 
 def normalize_name(value):
@@ -15,7 +16,12 @@ def normalize_name(value):
 
 
 def describe_issue(filename):
+    if (not filename or '/' in filename or '\\' in filename or '\0' in filename
+            or not filename.lower().endswith('.pdf')):
+        raise ValueError(f'Invalid PDF filename: {filename}')
     stem = normalize_name(filename)
+    if not stem:
+        raise ValueError('PDF filename must include a title')
     monthly = re.fullmatch(r'([0-9]{4})-([0-9]{2})', stem)
     if not monthly:
         monthly = re.fullmatch(PREFIX + r'([0-9]{4})年([0-9]{1,2})月号', stem)
@@ -40,8 +46,12 @@ def describe_issue(filename):
                            for word in ('特別', '特别'))
         return dict(id=issue, title=f'関西通信{year + "年" if year else ""}特別号',
                     filename=filename, aliases=sorted(set(aliases)), sort=[int(year or 0), 0])
-    raise ValueError(f'Unsupported PDF filename: {filename}. Use 関西通信2025年9月号.pdf, '
-                     '2026年特別号.pdf, 特別号.pdf or YYYY-MM.pdf.')
+    # Hash the normalized name, not PDF bytes: replacing this file keeps its URL.
+    issue = 'extra-' + hashlib.sha256(stem.encode('utf-8')).hexdigest()[:12]
+    year = re.search(r'(?<![0-9])([12][0-9]{3})(?![0-9])', stem)
+    title = re.sub(r'\.pdf$', '', filename, flags=re.I).strip()
+    return dict(id=issue, title=title, filename=filename, aliases=sorted({issue, stem}),
+                sort=[int(year.group(1)) if year else 0, 0])
 
 
 def discover_issues(directory, *, previous=(), on_skip=None):
@@ -50,13 +60,21 @@ def discover_issues(directory, *, previous=(), on_skip=None):
         raise ValueError('Set MAGAZINE_ISSUES_DIR to the publication repository issues folder')
     catalog, seen, contents = [], {}, {}
     owners = {alias: entry for entry in previous for alias in entry.get('aliases', [entry['id']])}
+    content_owners = {entry['sha256']: entry for entry in previous if entry.get('sha256')}
     preferred = {entry['filename'] for entry in previous}
+
+    def priority(pdf):
+        try:
+            extra = describe_issue(pdf.name)['id'].startswith('extra-')
+        except ValueError:
+            extra = True
+        return (pdf.name not in preferred, extra, pdf.name)
 
     def skip(pdf, reason, **extra):
         if on_skip:
             on_skip(dict(filename=pdf.name, status='skipped', reason=reason, **extra))
 
-    for pdf in sorted(directory.iterdir(), key=lambda p: (p.name not in preferred, p.name)):
+    for pdf in sorted(directory.iterdir(), key=priority):
         if not pdf.is_file() or pdf.suffix.lower() != '.pdf':
             continue
         try:
@@ -66,8 +84,10 @@ def discover_issues(directory, *, previous=(), on_skip=None):
         except (ValueError, OSError) as error:
             skip(pdf, str(error))
             continue
-        known = owners.get(entry['id'])
+        known = owners.get(entry['id']) or content_owners.get(digest)
         if known:
+            if not known['id'].startswith('extra-') and entry['id'] != known['id']:
+                entry['title'] = known['title']
             entry['redirects'] = sorted(set(known.get('redirects', []) +
                                            ([entry['id']] if entry['id'] != known['id'] else [])))
             entry['id'], entry['sort'] = known['id'], known['sort']
