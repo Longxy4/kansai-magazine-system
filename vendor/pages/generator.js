@@ -396,7 +396,6 @@ ENRICHMENT GUIDE:
             </button>
             <button id="issue-share" aria-label="共有" aria-haspopup="dialog">共有</button>
             <a id="issue-pdf" href="__ISSUE_PDF__" target="_blank" rel="noopener">PDF</a>
-            <button id="page-links-btn" class="icon-btn" aria-label="Page Links" style="display:none">リンク</button>
         </div>
 
         <button id="toc-btn" aria-label="ページと目次を開く" aria-controls="toc-modal" aria-expanded="false"></button>

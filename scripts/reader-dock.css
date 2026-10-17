@@ -20,7 +20,6 @@
 #copy-share,#close-share{padding:8px 12px;border:1px solid #ccc;background:#fff;border-radius:8px;font:inherit;font-size:13px;cursor:pointer}
 #close-share{margin-left:6px}
 button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #c9785b;outline-offset:2px}
-#controls-panel #page-links-btn{width:auto;min-width:32px;height:36px;padding:4px;font:inherit;font-size:13px;white-space:nowrap}
 .toc-list button.toc-item{box-sizing:border-box;width:100%;border:0;background:transparent;font:inherit;text-align:left;color:inherit}
 .toc-list button.toc-item:hover,.toc-list button.toc-item.active{background:#c9785b19;color:#c9785b}
 #toc-list .toc-item-title{white-space:normal;flex:1;margin-right:12px}
@@ -46,5 +45,5 @@ body:has(.toc-modal:not(.hidden),.page-sidebar:not(.hidden)) #controls-panel{opa
 .page-sidebar #toc-list .toc-item{gap:6px;padding:12px;line-height:1.5;font-size:13px}
 .page-sidebar #toc-list .toc-item-title{margin-right:0}
 @media(prefers-reduced-motion:reduce){.page-sidebar{transition:none}}
-@media(max-width:600px){#controls-panel{flex-wrap:wrap;row-gap:2px}#controls-panel #page-links-btn{font-size:12px}}
+@media(max-width:600px){#controls-panel{flex-wrap:wrap;row-gap:2px}}
 @media(max-width:600px){#controls-panel,#controls-panel:hover,#controls-panel.active{gap:5px;padding-left:8px;padding-right:8px;max-width:calc(100vw - 12px)}#controls-panel .page-input-container{gap:1px}#controls-panel .page-nav-btn{width:28px}#page-input{width:34px}#zoom-slider{width:56px}#controls-panel .zoom-controls{gap:2px}#zoom-level{min-width:26px}#fullscreen-btn{width:28px}#issue-share,#issue-pdf{padding:8px 5px;font-size:12px}}
