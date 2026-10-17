@@ -56,7 +56,7 @@ jobs:
         run: |
           mkdir -p system/.incoming
           if [ -n "$UPLOAD_RELEASE" ]; then
-            gh release download "$UPLOAD_RELEASE" --repo "$GITHUB_REPOSITORY" --pattern '*.pdf' --pattern '*.PDF' --dir system/.incoming
+            gh release download --repo "$GITHUB_REPOSITORY" --pattern '*.pdf' --pattern '*.PDF' --dir system/.incoming -- "$UPLOAD_RELEASE"
           fi
       - uses: actions/setup-python@v5
         with:
@@ -73,6 +73,8 @@ jobs:
         run: python system/scripts/manage-publication.py prepare --publication publication --incoming system/.incoming --combined system/.build/source-issues
       - name: Check system
         working-directory: system
+        env:
+          MAGAZINE_ISSUES_DIR: ${{ github.workspace }}/publication/issues
         run: |
           node --test tests/*.test.mjs
           python -m unittest discover -s tests -p 'test_*.py'

@@ -4,7 +4,6 @@ import hashlib
 import json
 from pathlib import Path
 import shutil
-from urllib.parse import quote
 
 
 def digest(file):
@@ -47,7 +46,7 @@ def collect(publication, incoming, combined, site):
     for entry in reversed(entries):
         title = entry['title'].replace('|', '\\|').replace('\n', ' ')
         lines.append(f"| {title} | [読む](https://longxy4.github.io/kansai-magazine/?issue={entry['id']}) "
-                     f"| [PDFを開く](issues/{quote(entry['filename'])}) |")
+                     f"| [PDFを開く](https://longxy4.github.io/kansai-magazine/issues/{entry['id']}.pdf) |")
     lines += ['', '## ご利用ガイド', '', '[日本語](docs/reader-guide.md) · [中文](docs/reader-guide.zh-CN.md)', '']
     (publication / 'README.md').write_text('\n'.join(lines), encoding='utf-8')
     shutil.copyfile(publication / 'README.md', site / 'README.md')
