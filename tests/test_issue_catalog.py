@@ -30,14 +30,16 @@ class IssueNames(unittest.TestCase):
         for filename in ('特别号.pdf', '特別号.pdf', '関西通信特別号.pdf', 'special.pdf'):
             self.assertEqual(describe_issue(filename)['id'], 'special')
 
-    def test_duplicate_month_or_special_fails_before_building(self):
+    def test_conflicting_file_is_reported_without_stopping_the_batch(self):
         for names in (('2025-09.pdf', '関西通信2025年9月号.pdf'),
                       ('特别号.pdf', '特別号.pdf')):
             with self.subTest(names=names), tempfile.TemporaryDirectory() as directory:
                 for name in names:
                     (Path(directory) / name).write_text(name, encoding='utf-8')
-                with self.assertRaisesRegex(ValueError, 'Duplicate issue'):
-                    discover_issues(directory)
+                events = []
+                self.assertEqual(len(discover_issues(directory, on_skip=events.append)), 1)
+                self.assertEqual(events[0]['status'], 'skipped')
+                self.assertIn('Duplicate issue', events[0]['reason'])
 
     def test_chronological_order_handles_specials_and_uppercase_extension(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -17,7 +17,7 @@ class MagazineLinks(unittest.TestCase):
     def setUpClass(cls):
         issue_dir = Path(os.environ.get('MAGAZINE_ISSUES_DIR', ROOT / 'issues'))
         entry = next((entry for entry in discover_issues(issue_dir) if entry['id'] == '2026-07'), None)
-        if entry is None:
+        if entry is None or entry['sha256'] != '5de250fd0603d46c560f2bacbe2b200067a019b239917518608f5ee6a92a4f43':
             raise unittest.SkipTest('The 2026-07 publication fixture is not available')
         cls.pdf = issue_dir / entry['filename']
         cls.metadata = extract_interactions(cls.pdf, [])

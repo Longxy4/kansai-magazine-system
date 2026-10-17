@@ -44,32 +44,55 @@ def describe_issue(filename):
                      '2026年特別号.pdf, 特別号.pdf or YYYY-MM.pdf.')
 
 
-def discover_issues(directory):
+def discover_issues(directory, *, previous=(), on_skip=None):
     directory = Path(directory)
     if not directory.is_dir():
         raise ValueError('Set MAGAZINE_ISSUES_DIR to the publication repository issues folder')
     catalog, seen, contents = [], {}, {}
-    for pdf in sorted(directory.iterdir()):
+    owners = {alias: entry for entry in previous for alias in entry.get('aliases', [entry['id']])}
+    preferred = {entry['filename'] for entry in previous}
+
+    def skip(pdf, reason, **extra):
+        if on_skip:
+            on_skip(dict(filename=pdf.name, status='skipped', reason=reason, **extra))
+
+    for pdf in sorted(directory.iterdir(), key=lambda p: (p.name not in preferred, p.name)):
         if not pdf.is_file() or pdf.suffix.lower() != '.pdf':
             continue
-        entry = describe_issue(pdf.name)
-        with pdf.open('rb') as stream:
-            digest = hashlib.file_digest(stream, 'sha256').hexdigest()
+        try:
+            entry = describe_issue(pdf.name)
+            with pdf.open('rb') as stream:
+                digest = hashlib.file_digest(stream, 'sha256').hexdigest()
+        except (ValueError, OSError) as error:
+            skip(pdf, str(error))
+            continue
+        known = owners.get(entry['id'])
+        if known:
+            entry['redirects'] = sorted(set(known.get('redirects', []) +
+                                           ([entry['id']] if entry['id'] != known['id'] else [])))
+            entry['id'], entry['sort'] = known['id'], known['sort']
+            entry['aliases'] = sorted(set(entry['aliases'] + known['aliases']))
+            if '特別号' in known['title']:
+                entry['title'] = known['title']
+        entry['filenames'] = [pdf.name]
         if entry['id'] in seen and seen[entry['id']]['sha256'] != digest:
-            raise ValueError(f'Duplicate issue {entry["id"]} has different PDF contents: '
-                             f'{seen[entry["id"]]["filename"]} and {pdf.name}. Keep the intended revision.')
+            skip(pdf, f'Duplicate issue {entry["id"]} has different contents; keeping '
+                 f'{seen[entry["id"]]["filename"]}', issue=entry['id'])
+            continue
         if digest in contents:
-            previous = contents[digest]
-            previous['aliases'] = sorted(set(previous['aliases'] + entry['aliases']))
-            if previous['id'] != entry['id']:
-                previous['redirects'] = sorted(set(previous.get('redirects', []) + [entry['id']]))
+            merged = contents[digest]
+            merged['aliases'] = sorted(set(merged['aliases'] + entry['aliases']))
+            merged['redirects'] = sorted(set(merged.get('redirects', []) + entry.get('redirects', [])
+                                            + ([entry['id']] if merged['id'] != entry['id'] else [])))
             if entry['id'].endswith('-special'):
-                previous['title'] = entry['title']
-            seen[entry['id']] = previous
+                merged['title'] = entry['title']
+            merged['filenames'].append(pdf.name)
+            seen[entry['id']] = merged
+            if on_skip:
+                on_skip(dict(filename=pdf.name, issue=merged['id'], status='duplicate',
+                             reason='Identical PDF already included; names and links merged'))
             continue
         entry['sha256'] = digest
         seen[entry['id']] = contents[digest] = entry
         catalog.append(entry)
-    if not catalog:
-        raise ValueError('No magazine PDFs found')
     return sorted(catalog, key=lambda entry: (*entry['sort'], entry['id']))

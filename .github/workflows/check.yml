@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MAGAZINE_ISSUES_DIR: ${{ github.workspace }}/publication/issues
+      MAGAZINE_PUBLISHED_URL: https://longxy4.github.io/kansai-magazine/
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,6 +23,13 @@ jobs:
           ref: main
           path: publication
           persist-credentials: false
+      - name: Restore converted magazine pages
+        uses: actions/cache@v5
+        with:
+          path: system/.build
+          key: magazine-v2-${{ runner.os }}-${{ hashFiles('system/scripts/**', 'system/vendor/**', 'publication/issues/*.pdf', 'publication/issues/*.PDF') }}
+          restore-keys: |
+            magazine-v2-${{ runner.os }}-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -44,3 +52,7 @@ jobs:
         run: |
           python scripts/render-issues.py
           node scripts/build-site.mjs
+      - name: Report per-file publication results
+        if: always()
+        working-directory: system
+        run: python scripts/publish-summary.py
