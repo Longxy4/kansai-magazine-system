@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pageFlip.on('init', () => {
             updateImageSizes();
             updateEpubContentScale();
-            preloadNextSpread(0);
+            preloadNextSpread(pageFlip.getCurrentPageIndex());
 
             // Hide loading screen
             const loadingScreen = document.getElementById('loading-screen');

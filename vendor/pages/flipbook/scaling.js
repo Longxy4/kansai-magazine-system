@@ -14,23 +14,12 @@ function updateImageSizes() {
 
     images.forEach((img) => {
         if (img && img.hasAttribute('srcset')) {
-            const baseSize = 50;
+            const baseSize = window.innerHeight > window.innerWidth ? 100 : 50;
             const zoomedSize = Math.round(baseSize * zoomLevel);
             const newSizes = `${zoomedSize}vw`;
 
             if (img.sizes !== newSizes) {
                 img.sizes = newSizes;
-                if (zoomLevel > 1) {
-                    const srcset = img.srcset;
-                    img.srcset = '';
-                    img.srcset = srcset;
-                }
-            }
-
-            if (zoomLevel > 1) {
-                img.style.transform = 'translateZ(0)';
-            } else {
-                img.style.transform = '';
             }
         }
     });

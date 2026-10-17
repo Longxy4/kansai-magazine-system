@@ -33,7 +33,7 @@ body:has(.toc-modal:not(.hidden),.page-sidebar:not(.hidden)) #controls-panel{opa
 #toc-btn:hover,#toc-btn:focus-visible{opacity:0;background:transparent;box-shadow:none}
 #toc-btn[aria-expanded=true]{opacity:0;pointer-events:auto;z-index:3300}
 /* Single-page curls stay inside one sheet, including when the book is zoomed. */
-#flipbook[data-display=single] .stf__block{clip-path:inset(0)}
+#flipbook[data-display=single] .stf__block{overflow:hidden;isolation:isolate}
 @media(max-width:600px), (hover:none) and (pointer:coarse){
   #toc-btn,#toc-btn:hover,#toc-btn:focus-visible{opacity:1;background:rgba(69,58,50,.08);border-radius:0 5px 5px 0}
   #toc-btn::after{content:"";position:absolute;left:5px;top:34px;width:2px;height:28px;border-radius:2px;background:rgba(69,58,50,.28);pointer-events:none}

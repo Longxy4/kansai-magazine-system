@@ -8,38 +8,23 @@
  */
 function preloadNextSpread(currentIndex) {
     const config = window.FLIPBOOK_CONFIG || {};
-    const isDoubleSpread = config.doubleSpread;
+    const isDoubleSpread = pageFlip && pageFlip.getSettings().display === 'double';
     const pageCount = config.pageCount;
 
     // Calculate next pages to preload
-    let pagesToPreload = [];
-
-    if (isDoubleSpread) {
-        pagesToPreload = [
-            currentIndex + 1,
-            currentIndex + 2,
-            currentIndex + 3,
-            currentIndex + 4
-        ];
-    } else {
-        pagesToPreload = [currentIndex + 1, currentIndex + 2];
-    }
+    const pagesToPreload = isDoubleSpread
+        ? [currentIndex - 2, currentIndex - 1, currentIndex, currentIndex + 1, currentIndex + 2, currentIndex + 3]
+        : [currentIndex - 1, currentIndex, currentIndex + 1];
 
     pagesToPreload.forEach(idx => {
-        if (idx < pageCount) {
+        if (idx >= 0 && idx < pageCount) {
             const allImages = document.querySelectorAll('.page-image');
             if (allImages[idx]) {
                 const img = allImages[idx];
                 if (img.src) {
-                    const preloader = new Image();
-                    preloader.src = img.src;
-                    if (img.srcset) preloader.srcset = img.srcset;
-
-                    // Calculate correct sizes matching updateImageSizes logic
-                    const zoomLevel = window.currentZoom || 1;
-                    const baseSize = 50;
-                    const zoomedSize = Math.round(baseSize * zoomLevel);
-                    preloader.sizes = `${zoomedSize}vw`;
+                    // Decode the actual page, so both forward and backward turns
+                    // can reuse its bitmap instead of decoding a new preloader.
+                    if (img.decode) img.decode().catch(() => {});
                 }
             }
         }
