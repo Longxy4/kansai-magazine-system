@@ -22,7 +22,8 @@ function fixture() {
         document:{querySelector:()=>null, getElementById:id=>id==='flipbook-wrapper'?wrapper:container},
         Event:class {constructor(type){this.type=type;}},
         setTimeout:fn=>{timers.set(++id, fn);return id;}, clearTimeout:id=>timers.delete(id),
-        updateEpubContentScale(){}, debouncedUpdateImageSizes:()=>quality++, isZoomed:()=>context.zoom>1});
+        updateEpubContentScale(){}, debouncedUpdateImageSizes:()=>quality++, isZoomed:()=>context.zoom>1,
+        isNearReaderBottom:y=>y>=window.innerHeight-96});
     vm.runInContext(source, context);
     context.setupTouchGestures(wrapper, slider, label, () => reveals++);
     const emit = (type, points=[], extra={}) => {

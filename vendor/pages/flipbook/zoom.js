@@ -73,7 +73,7 @@ function updateTransform(isPanOnly = false) {
             if (window.pageFlip) {
                 const settings = window.pageFlip.getSettings();
                 settings.useMouseEvents = true;
-                settings.showPageCorners = true;
+                settings.showPageCorners = settings.display !== 'single';
             }
         }
     }
@@ -198,7 +198,7 @@ function setupTouchGestures(wrapper, slider, label, revealControls = () => {}) {
         if (g.link && !moved) { cancelTap(); suppressClickUntil = 0; return; }
         consume(e);
         suppressClickUntil = Date.now() + 600;
-        if (!moved && p.y >= window.innerHeight - 96) {
+        if (!moved && isNearReaderBottom(p.y)) {
             cancelTap();
             revealControls();
             return;

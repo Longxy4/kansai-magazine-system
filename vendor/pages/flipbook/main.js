@@ -92,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
             maxShadowOpacity: 0.5,
             flippingTime: 500,
             useMouseEvents: true,
+            showPageCorners: !isSingleMode,
             swipeDistance: 30,
             mobileScrollSupport: false,
             display: window.innerHeight > window.innerWidth ? 'single' : 'double',
@@ -108,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateEpubContentScale();
         pageFlip.loadFromHTML(document.querySelectorAll('.page-container'));
         window.pageFlip = pageFlip;
+        setupSinglePageTransition(pageFlip, container);
 
         // Initialize UI and Links AFTER pageFlip is ready
         setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topControlsPanel, fullscreenBtn, wrapper, tocBtn, tableOfContents, tocModal, tocList, tocCloseBtn, tocOverlay, prevPageBtn, nextPageBtn, pageLinksBtn, linksModal, linksList, linksCloseBtn);
@@ -186,12 +188,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle window resize
     window.addEventListener('resize', () => {
         if (window.isProgrammaticResize) return;
+        pageFlip.cancelSingleTransition();
         const dims = calculateDimensions(wrapper, config);
         const single = window.innerHeight > window.innerWidth;
         const settings = pageFlip.getSettings();
         const changed = settings.display !== (single ? 'single' : 'double');
         settings.display = single ? 'single' : 'double';
         settings.showCover = !single;
+        settings.showPageCorners = !single && !isZoomed();
         flipbookEl.dataset.display = settings.display;
         settings.width = single ? dims.width : dims.width / 2;
         settings.height = dims.height;

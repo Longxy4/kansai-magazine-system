@@ -2,7 +2,36 @@
  * Flipbook UI Module
  * Manages all UI event listeners, controls (zoom, full-screen, TOC), and user input handling.
  */
+function isNearReaderBottom(y) {
+    const viewport = window.visualViewport;
+    const bottom = viewport ? viewport.offsetTop + viewport.height : window.innerHeight;
+    return y >= bottom - 96 / (viewport?.scale || 1);
+}
+
+function setupViewportDock(panel) {
+    if (!panel) return;
+    // A transformed ancestor changes the containing block of position:fixed.
+    if (panel.parentElement !== document.body) document.body.appendChild(panel);
+    const update = () => {
+        const viewport = window.visualViewport;
+        const scale = viewport?.scale || 1;
+        const width = viewport?.width || window.innerWidth;
+        const left = viewport?.offsetLeft || 0;
+        const bottom = viewport ? window.innerHeight - viewport.offsetTop - viewport.height : 0;
+        panel.style.setProperty('--dock-center', `${left + width / 2}px`);
+        panel.style.setProperty('--dock-inset', `${bottom}px`);
+        panel.style.setProperty('--dock-gap', `${24 / scale}px`);
+        panel.style.setProperty('--dock-scale', String(1 / scale));
+        panel.style.setProperty('--dock-width', `${width * scale}px`);
+    };
+    window.visualViewport?.addEventListener('resize', update, {passive:true});
+    window.visualViewport?.addEventListener('scroll', update, {passive:true});
+    window.addEventListener('resize', update, {passive:true});
+    update();
+}
+
 function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topControlsPanel, fullscreenBtn, wrapper, tocBtn, tableOfContents, tocModal, tocList, tocCloseBtn, tocOverlay, prevPageBtn, nextPageBtn, pageLinksBtn, linksModal, linksList, linksCloseBtn) {
+    setupViewportDock(controlsPanel);
     // Mobile-friendly control panel activation (both panels share state)
     let controlsPanelTimeout = null;
     let isUsingSlider = false;
@@ -43,7 +72,7 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
     }
 
     // Reuse Pages' active state and hide timer. Only the bottom edge reveals it.
-    const nearBottom = y => y >= window.innerHeight - 96;
+    const nearBottom = isNearReaderBottom;
     document.addEventListener('pointermove', e => {
         if (e.pointerType === 'touch' || document.querySelector('dialog[open], .toc-modal:not(.hidden)')) return;
         if (document.querySelector('.page-sidebar:not(.hidden)') || e.target.closest?.('.page-sidebar, #toc-btn')) return;
