@@ -17,7 +17,7 @@ function fixture(){
   const context=vm.createContext({document,window,zoom:1,Event:class{constructor(type){this.type=type;}},matchMedia:()=>({matches:true}),
     setTimeout:(fn,ms)=>{timers.set(++id,{fn,ms});return id;},clearTimeout:i=>timers.delete(i),
     updateTransform:()=>transforms++,debouncedUpdateImageSizes:()=>qualityUpdates++,
-    isZoomed:()=>context.zoom>1});
+    isZoomed:()=>context.zoom>1,setupTouchGestures:()=>{}});
   vm.runInContext(source,context);context.setupUI(30,null,slider,new Target(),controls,null,null,wrapper);
   const emit=(type,props={})=>{const e={type,target:{tagName:'BODY'},preventDefault(){this.prevented=true;},...props};document.dispatchEvent(e);return e;};
   return {context,slider,controls,timers,emit,counts:()=>({transforms,qualityUpdates})};

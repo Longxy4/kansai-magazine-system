@@ -389,7 +389,7 @@ ENRICHMENT GUIDE:
             </div>
             <div class="zoom-controls">
                 <input type="range" id="zoom-slider" min="1" max="3" step="0.05" value="1" aria-label="Zoom">
-                <div id="zoom-level">1x</div>
+                <button type="button" id="zoom-level" aria-label="拡大をリセット" title="元の大きさに戻す">1x</button>
             </div>
             <button id="fullscreen-btn" aria-label="Toggle Fullscreen" title="全画面">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>

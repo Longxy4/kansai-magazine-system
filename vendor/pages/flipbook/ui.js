@@ -57,7 +57,7 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
     document.addEventListener('touchstart', e => {
         if (e.touches.length !== 1 || document.querySelector('dialog[open], .toc-modal:not(.hidden)') || e.target.closest?.('a.pdf-link')) return;
         if (e.target.closest?.('.page-sidebar, #toc-btn')) return;
-        if (nearBottom(e.touches[0].clientY) && !controlsPanel.contains(e.target)) {
+        if (!isZoomed() && nearBottom(e.touches[0].clientY) && !controlsPanel.contains(e.target)) {
             // Consume the reveal tap so it does not also turn the magazine page.
             if (e.cancelable) e.preventDefault();
             e.stopPropagation();
@@ -544,17 +544,8 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
         }
     });
     window.addEventListener('mouseup', onEnd);
-    wrapper.addEventListener('touchstart', (e) => {
-        if (e.target.closest('#controls-panel') || e.target.closest('#top-controls-panel') || e.target.closest('dialog')) return;
-        if (e.touches.length === 1) onStart(e.touches[0].clientX, e.touches[0].clientY);
-    }, { passive: true });
-    window.addEventListener('touchmove', (e) => {
-        if (isPanning && e.touches.length === 1) {
-            if (isActuallyPanning && e.cancelable) {
-                e.preventDefault();
-            }
-            onMove(e.touches[0].clientX, e.touches[0].clientY);
-        }
-    }, { passive: false });
-    window.addEventListener('touchend', onEnd);
+    setupTouchGestures(wrapper, zoomSlider, zoomText, () => {
+        activateControlPanel();
+        deactivateControlPanel();
+    });
 }
